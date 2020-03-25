@@ -50,10 +50,9 @@ public:
         data_length = sizeof(T);
     }
 
-    // access methods
-    T Read() { return current_value; }
+    inline T Read() { return current_value; }
 
-    void Write(T write_value)
+    inline void Write(const T write_value)
     {
         current_value = write_value;
         EEPROM.put(eeprom_address, write_value);
@@ -61,8 +60,8 @@ public:
 
 private:
     // read from EEPROM or reset to default
-    void Update() { EEPROM.get(eeprom_address, current_value); }
-    void Reset() { Write(default_value); }
+    inline void Update() { EEPROM.get(eeprom_address, current_value); }
+    inline void Reset() { Write(default_value); }
 
     // maintain the current and default value
     T current_value;
@@ -75,18 +74,35 @@ private:
 // --------------------------------------------------------
 class TeensyEEPROM {
 public:
-    TeensyEEPROM();
+    TeensyEEPROM(uint16_t version_number, uint16_t start_address = 0);
 
+    // call once at program startup
     bool Initialize();
 
 protected:
-    bool Reconfigure();
-
+    // add one data point to the EEPROM configs
     bool Register(EEPROMDatatype * data);
 
-    volatile void RegisterAll() = 0;
+    // child classes must implement a method that registers all configs
+    virtual void RegisterAll() = 0;
+
+private:
+    // on each reboot
+    void UpdateAll();
+
+    // in case of version failure
+    void Reconfigure();
 
     EEPROMDatatype * head = NULL;
+    EEPROMDatatype * tail = NULL;
+
+    // maintain a version number with the configs in EEPROM
+    uint16_t version;
+
+    // track the EEPROM usage
+    uint16_t start_addr;
+    uint16_t next_addr;
+
 };
 
 
