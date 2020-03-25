@@ -7,18 +7,20 @@ This libary defines a robust system for storing configurations in Teensy EEPROM 
 ## Library Contents
 
 `TeensyEEPROM.h/cpp`: the library code
+
 `examples/TeensyEEPROMTemplate.h/cpp`: a template that shows how to use the class
+
 `examples/TeensyEEPROM_Test.ino`: a test Arduino script using the template
 
 ## Implementation
 
-*Understanding the implemenation is not necessary for using the library, but this explanation is included for those who are curious.* The implementation is an abstract base class, `TeensyEEPROM`, that serves as the interface to the EEPROM, maintaining a version number and all data points and their addresses. The library provides the `EEPROMData` type from which all data points must be instantiated. `EEPROMData` is templated to allow users complete flexibility in their configuration types. `EEPROMData` objects maintain FLASH defaults, the RAM duplicates, and metadata used by the `TeensyEEPROM` class for addressing. Each `EEPROMData` object must be registered with the `TeensyEEPROM` class on initialization, which is enforced by the inclusion of a pure virtual protected method `RegisterAll()` called by the public `Initialize()` method. The `EEPROMData` class inherits from the abstract base class `EEPROMDatatype` that allows `TeensyEEPROM` to access the necessary metadata as a friend class, and to allow the provision on a protected `Register(EEPROMDatatype *)` method for intended use in `RegisterAll()`.
+*Understanding the implemenation is not necessary for using the library, but this explanation is included for those who are curious.* The implementation is an abstract base class, `TeensyEEPROM`, that serves as the interface to the EEPROM, maintaining a version number and all data points and their addresses. The library provides the `EEPROMData` type from which all data points must be instantiated. `EEPROMData` is templated to allow users complete flexibility in their configuration types. `EEPROMData` objects maintain FLASH defaults, the RAM duplicates, and metadata used by the `TeensyEEPROM` class for addressing. Each `EEPROMData` object must be registered with the `TeensyEEPROM` class on initialization, which is enforced by the inclusion of a pure virtual protected method `RegisterAll()` called by the public `Initialize()` method. The `EEPROMData` class inherits from the abstract base class `EEPROMDatatype` that allows `TeensyEEPROM` to access the necessary metadata as a friend class, and to allow the provision of a protected `Register(EEPROMDatatype *)` method for intended use in `RegisterAll()`.
 
 ## Usage
 
 ### Creating an Inheriting Class
 
-The user should create a general configuration class that inherits from `TeensyEEPROM` and instantiates `EEPROMData` objects for each configuration datapoint. A complete example is included in the `examples/` directory and explained here. The class definition should be as follows:
+The user should create a general configuration class that inherits from `TeensyEEPROM` and instantiates `EEPROMData` objects for each configuration datapoint. A complete example is included in the `examples/` directory and explained here. The class definition could be modeled after the following class:
 
 ```C++
 class TeensyEEPROMTemplate : public TeensyEEPROM {
@@ -76,7 +78,7 @@ void TeensyEEPROMTemplate::RegisterAll()
 
 ### Using the Class
 
-With the class set up. Usage is easy. First, the user must instantiate an object of the inheriting class:
+With the class set up, usage is easy. First, the user must instantiate an object of the inheriting class:
 
 ```C++
 TeensyEEPROMTemplate eeprom_template;
@@ -103,3 +105,12 @@ eeprom_template.s0.Read().u[2];
 eeprom_template.f0.Write(3.1415);
 eeprom_template.s0.Write(new_struct_s0);
 ```
+
+### Versioning
+
+Whenever the user updates the number/type/order of configurations in EEPROM, they **must manually** update the EEPROM_VERSION or equivalent variable/macro passed into the `TeensyEEPROM` constructor. This will force the class to reconfigure the EEPROM.
+
+### Future Work
+
+* *Improved Versioning*: it would be best if the user didn't have to manually update the version each time the configuration structure changes
+* *Checksum/CRC*: right now, the only way an EEPROM failure can be detected is if the version number in EEPROM doesn't match the version number in FLASH. It would be possible to add a checksum or CRC to the `TeensyEEPROM` class that will automatically update every time a configuration is changed. The downside to this is that it will increase EEPROM write cycles, and will increase execution time whenever a configuration is changed.
