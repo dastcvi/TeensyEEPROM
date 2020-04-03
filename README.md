@@ -10,6 +10,8 @@ This libary defines a robust system for storing configurations in Teensy EEPROM 
 
 `v1.1`: Adds `Bufferize` function (writes contents of EEPROM to a `uint8_t` buffer)
 
+`v1.2`: Added the EEPROM version number to the `Bufferize` buffer
+
 ## Library Contents
 
 `TeensyEEPROM.h/cpp`: the library code
