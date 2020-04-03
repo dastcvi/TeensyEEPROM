@@ -6,6 +6,8 @@
 #include "TeensyEEPROMTemplate.h"
 
 TeensyEEPROMTemplate eeprom_template;
+uint8_t output_buffer[50];
+uint16_t buffer_length = 0;
 
 void setup()
 {
@@ -23,7 +25,7 @@ void setup()
   Serial.print("EEPROM Base: 0x"); Serial.println(eeprom_template.BASE_ADDR, HEX);
   Serial.println();
 
-  print_all();  
+  print_all();
 }
 
 void print_all()
@@ -89,10 +91,21 @@ void loop()
       eeprom_template.s0.Write(new_s0);
       Serial.println("Wrote new s0");
       break;
+    case 'b':
+      buffer_length = eeprom_template.Bufferize(output_buffer, 50);
+      Serial.print("Buffer (len=");
+      Serial.print(buffer_length);
+      Serial.println("):");
+      for (int i = 0; i < buffer_length; i++) {
+        Serial.print("0x");
+        Serial.print(output_buffer[i], HEX);
+        Serial.print(", ");
+      }
+      Serial.println();
+      break;
     default:
       // ignore it
       break;
     }
   }
 }
-

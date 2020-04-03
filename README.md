@@ -4,6 +4,12 @@
 
 This libary defines a robust system for storing configurations in Teensy EEPROM that extends the core [EEPROM library](https://www.arduino.cc/en/Reference/EEPROM). Each configuration value is duplicated in RAM and has a hard-coded default stored in FLASH so that in case of complete EEPROM failure, the interface can still be used to access and update configurations (though they'll be restored to their defaults on a processor reset). Additionally, the library maintains a configuration version number. This way, if the microcontroller resets and the incorrect version is detected (in case of a new program or EEPROM failure), it can restore the default configuration values. Finally, the library maintains all addressing for the user and provides one-line read and write methods.
 
+## Library Versions
+
+`v1.0`: Initial working version
+
+`v1.1`: Adds `Bufferize` function (writes contents of EEPROM to a `uint8_t` buffer)
+
 ## Library Contents
 
 `TeensyEEPROM.h/cpp`: the library code
@@ -106,11 +112,15 @@ eeprom_template.f0.Write(3.1415);
 eeprom_template.s0.Write(new_struct_s0);
 ```
 
-### Versioning
+### EEPROM Versioning
 
 Whenever the user updates the number/type/order of configurations in EEPROM, they **must manually** update the EEPROM_VERSION or equivalent variable/macro passed into the `TeensyEEPROM` constructor. This will force the class to reconfigure the EEPROM.
 
-### Future Work
+### Bufferize
+
+The `uint16_t Bufferize(uint8_t * buffer, uint16_t buffer_size)` function takes as inputs a buffer and the length of the buffer and writes the contents of EEPROM to the buffer. It returns the number of bytes written (0 in the case of an error). This allows, for example, easy telemetering of EEPROM configurations. **Note that unlike other interfaces to this class, Bufferize writes the EEPROM contents, not the RAM copy**.
+
+## Future Work
 
 * *Improved Versioning*: it would be best if the user didn't have to manually update the version each time the configuration structure changes
 * *Checksum/CRC*: right now, the only way an EEPROM failure can be detected is if the version number in EEPROM doesn't match the version number in FLASH. It would be possible to add a checksum or CRC to the `TeensyEEPROM` class that will automatically update every time a configuration is changed. The downside to this is that it will increase EEPROM write cycles, and will increase execution time whenever a configuration is changed.

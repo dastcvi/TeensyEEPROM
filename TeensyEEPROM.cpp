@@ -34,6 +34,27 @@ bool TeensyEEPROM::Initialize()
     }
 }
 
+uint16_t TeensyEEPROM::Bufferize(uint8_t * buffer, uint16_t buffer_size)
+{
+    EEPROMDatatype * node = head;
+    uint16_t bytes_written = 0;
+
+    // make sure the input buffer is big enough
+    if (buffer_size < (next_addr - start_addr)) return 0;
+
+    // traverse the linked list, adding each data point to the buffer
+    while (NULL != node) {
+        // read each byte of the data point
+        for (uint16_t i = node->eeprom_address; i < (node->eeprom_address + node->data_length); i++) {
+            buffer[bytes_written++] = EEPROM.read(i);
+        }
+
+        node = node->next;
+    }
+
+    return bytes_written;
+}
+
 bool TeensyEEPROM::Register(EEPROMDatatype * data)
 {
     // check that it will fit (E2END from avr/eeprom.h)

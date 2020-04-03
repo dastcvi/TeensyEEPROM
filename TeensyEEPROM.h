@@ -79,6 +79,10 @@ public:
     // call once at program startup
     bool Initialize();
 
+    // write all tracked EEPROM contents to buffer (of size buffer_size)
+    // returns the number of bytes written (returns 0 in case of an error)
+    uint16_t Bufferize(uint8_t * buffer, uint16_t buffer_size);
+
 protected:
     // add one data point to the EEPROM configs
     bool Register(EEPROMDatatype * data);
