@@ -54,6 +54,13 @@ public:
 
     inline void Write(const T write_value)
     {
+        // On Teensy 3.6, EEPROM interferes with Serial1/2 baud rate (https://www.pjrc.com/teensy/td_uart.html)
+        // Thus, attempt to at least finish transmitting the TX buffers before writing
+        #if defined(__MK66FX1M0__)
+        Serial1.flush();
+        Serial2.flush();
+        #endif
+
         current_value = write_value;
         EEPROM.put(eeprom_address, write_value);
     }
